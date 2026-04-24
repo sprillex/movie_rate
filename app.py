@@ -218,5 +218,21 @@ def clear_trailer():
     conn.close()
     return redirect(url_for('index', id_a=mid, id_b=oid) if oid and oid != "None" else url_for('index'))
 
+
+@app.route('/rankings')
+def rankings():
+    page = max(1, request.args.get('page', 1, type=int))
+    per_page = 50
+    offset = (page - 1) * per_page
+
+    conn = get_db_connection()
+    total_movies = conn.execute("SELECT COUNT(*) FROM movies").fetchone()[0]
+    movies = conn.execute("SELECT * FROM movies ORDER BY elo DESC LIMIT ? OFFSET ?", (per_page, offset)).fetchall()
+    conn.close()
+
+    total_pages = (total_movies + per_page - 1) // per_page
+
+    return render_template('rankings.html', movies=movies, page=page, total_pages=total_pages)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.getenv("FLASK_PORT", 5000)))
