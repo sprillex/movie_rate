@@ -100,9 +100,15 @@ def edit_movie(movie_id):
 @app.route('/update_movie', methods=['POST'])
 def update_movie():
     mid, oid = request.form.get('movie_id'), request.form.get('other_id')
+    title, year, summary = request.form.get('title'), request.form.get('year'), request.form.get('summary')
     conn = get_db_connection()
-    conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?", 
-                 (request.form.get('title'), request.form.get('year'), request.form.get('summary'), mid))
+    try:
+        conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
+                     (title, year, summary, mid))
+    except sqlite3.IntegrityError:
+        conn.execute("UPDATE movies SET title = title || ' [Duplicate ' || id || ']' WHERE title=? AND year=? AND id!=?", (title, year, mid))
+        conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
+                     (title, year, summary, mid))
     conn.commit()
     conn.close()
     return redirect(url_for('index', id_a=mid, id_b=oid) if oid and oid != "None" else url_for('index'))
@@ -133,8 +139,13 @@ def apply_plex_sync(movie_id):
         if row and row['plex_id']:
             plex = PlexServer(os.getenv('PLEX_URL'), os.getenv('PLEX_TOKEN'))
             p_movie = plex.fetchItem(row['plex_id'])
-            conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?", 
-                         (p_movie.title, p_movie.year, p_movie.summary, movie_id))
+            try:
+                conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
+                             (p_movie.title, p_movie.year, p_movie.summary, movie_id))
+            except sqlite3.IntegrityError:
+                conn.execute("UPDATE movies SET title = title || ' [Duplicate ' || id || ']' WHERE title=? AND year=? AND id!=?", (p_movie.title, p_movie.year, movie_id))
+                conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
+                             (p_movie.title, p_movie.year, p_movie.summary, movie_id))
             conn.commit()
     except Exception as e:
         print(f"Apply Sync Error: {e}")
