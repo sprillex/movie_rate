@@ -100,6 +100,16 @@
         }
         .accept-btn-link:hover { background: #00c4b0; }
 
+        .btn-skip {
+            background: #555;
+            color: white;
+            width: 50%;
+            margin: 20px auto;
+            display: block;
+            transition: background 0.2s;
+        }
+        .btn-skip:hover { background: #666; }
+
         .nav-links { margin-top: 30px; }
         .nav-links a { color: #03dac6; text-decoration: none; font-weight: bold; }
     </style>
@@ -216,6 +226,10 @@
                 <button type="submit" name="action" value="B_wins" class="btn-win">This is Better</button>
                 <button type="submit" name="action" value="set_aside_b" class="btn-aside">Set Aside for Review</button>
             </div>
+        </div>
+
+        <div style="width: 100%; text-align: center;">
+            <button type="submit" name="action" value="skip" class="btn-skip">Skip</button>
         </div>
     </form>
 
