@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Movies</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+        .movie-list {
+            width: 100%;
+            max-width: 600px;
+        }
+        .movie-item {
+            background-color: #1e1e1e;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            background-color: #03dac6;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #018786; }
+        .nav-link {
+            color: #bb86fc;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="nav-link">&larr; Back to Voting</a>
+    
+    <h1>Set Aside Movies</h1>
+
+    <div class="movie-list">
+        {% if movies %}
+            {% for movie in movies %}
+            <div class="movie-item">
+                <span>{{ movie.title }} ({{ movie.year }})</span>
+                <form action="/restore" method="POST" style="margin: 0;">
+                    <input type="hidden" name="id" value="{{ movie.id }}">
+                    <button type="submit">Restore to Active</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No movies are currently set aside.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Trailer</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        .result-card {
+            background-color: #1e1e1e;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .result-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .result-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .result-title:hover { color: #bb86fc; text-decoration: underline; }
+        .result-channel {
+            color: #aaaaaa;
+            font-size: 0.9em;
+        }
+        button {
+            background-color: #03dac6;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            height: fit-content;
+        }
+        button:hover { background-color: #018786; }
+        .nav-link {
+            color: #bb86fc;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+    </style>
+    <script>
+        function openTrailer(event, url) {
+            event.preventDefault();
+            var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                window.open(url, '_blank');
+            } else {
+                window.location.href = "mpv:" + url;
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <a href="{{ url_for('index', id_a=movie.id, id_b=other_id) if other_id else url_for('index') }}" class="nav-link">&larr; Cancel and Return</a>
+    
+    <h2>Select Trailer for: {{ movie.title }} ({{ movie.year }})</h2>
+
+    <div class="container">
+        {% if results %}
+            {% for entry in results %}
+            <div class="result-card">
+                <div class="result-info">
+                    <a href="{{ entry.url }}" onclick="openTrailer(event, '{{ entry.url }}')" class="result-title">{{ entry.title }}</a>
+                    <span class="result-channel">Channel: {{ entry.uploader_id or 'Unknown' }} (Score: {{ entry.score }}) &nbsp;|&nbsp; Length: {{ entry.formatted_duration }}</span>
+                </div>
+                
+                <form action="/set_trailer" method="POST" style="margin: 0;">
+                    <input type="hidden" name="movie_id" value="{{ movie.id }}">
+                    <input type="hidden" name="selected_url" value="{{ entry.url }}">
+                    <input type="hidden" name="selected_channel" value="{{ entry.uploader_id }}">
+                    
+                    {% if other_id %}
+                    <input type="hidden" name="other_id" value="{{ other_id }}">
+                    {% endif %}
+                    
+                    {% for channel in results %}
+                        <input type="hidden" name="all_channels" value="{{ channel.uploader_id }}">
+                    {% endfor %}
+                    
+                    <button type="submit">Select This Trailer</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No short trailer results found on YouTube.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

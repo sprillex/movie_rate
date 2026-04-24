@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Movie: {{ movie.title }}</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+        h2 { margin-top: 0; color: #bb86fc; text-align: center; }
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #03dac6;
+            font-size: 0.9em;
+        }
+        input[type="text"], input[type="number"], textarea {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #bb86fc;
+            background-color: #333;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.5;
+        }
+        .metadata-box {
+            background-color: #151515;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3700b3;
+        }
+        .metadata-item {
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            color: #888;
+        }
+        .metadata-value {
+            color: #bbb;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .btn-save {
+            background-color: #bb86fc;
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        .btn-save:hover { background-color: #9965f4; }
+        .nav-link {
+            color: #bb86fc;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+            font-weight: bold;
+        }
+        .nav-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <a href="{{ url_for('index', id_a=movie.id, id_b=other_id) if other_id else url_for('index') }}" class="nav-link">&larr; Cancel and Return</a>
+    
+    <div class="container">
+        <h2>Edit Movie Details</h2>
+        
+        <div class="metadata-box">
+            <div class="metadata-item">Plex ID (ratingKey): <span class="metadata-value">{{ movie.plex_id }}</span></div>
+            <div class="metadata-item">Filename: <span class="metadata-value">{{ movie.file_name }}</span></div>
+            <div class="metadata-item">Full Path: <div class="metadata-value" style="margin-top:5px;">{{ movie.file_path }}</div></div>
+        </div>
+
+        <form action="/update_movie" method="POST">
+            <input type="hidden" name="movie_id" value="{{ movie.id }}">
+            {% if other_id %}
+            <input type="hidden" name="other_id" value="{{ other_id }}">
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="title">Display Title</label>
+                <input type="text" id="title" name="title" value="{{ movie.title }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="year">Release Year</label>
+                <input type="number" id="year" name="year" value="{{ movie.year }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="summary">Summary / Description</label>
+                <textarea id="summary" name="summary">{{ movie.summary }}</textarea>
+            </div>
+            
+            <button type="submit" class="btn-save">Save Changes</button>
+        </form>
+    </div>
+
+</body>
+</html>

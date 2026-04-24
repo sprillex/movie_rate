@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Ranker</title>
+    <style>
+        body { 
+            background: #121212; 
+            color: #e0e0e0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+        }
+        h1 { color: #bb86fc; margin-bottom: 30px; }
+        .container { 
+            display: flex; 
+            gap: 40px; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            padding: 20px;
+        }
+        .movie-card { 
+            background: #1e1e1e; 
+            padding: 25px; 
+            border-radius: 12px; 
+            width: 350px; 
+            text-align: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            border: 1px solid #333;
+        }
+        .movie-summary { 
+            font-size: 0.9em; 
+            color: #aaa; 
+            text-align: left; 
+            height: 100px; 
+            overflow-y: auto; 
+            margin: 15px 0; 
+            padding: 10px; 
+            background: #151515;
+            border-radius: 4px;
+            line-height: 1.4;
+        }
+        .link-bar { 
+            font-size: 0.8em; 
+            margin-bottom: 12px; 
+            color: #666;
+        }
+        .link-bar a { 
+            color: #888; 
+            text-decoration: none; 
+            transition: color 0.2s;
+        }
+        .link-bar a:hover { color: #bb86fc; }
+        
+        .trailer-btn { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            color: #ff3366; 
+            text-decoration: none; 
+            font-weight: bold; 
+            border: 1px solid #ff3366; 
+            border-radius: 5px; 
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+        .trailer-btn:hover { background: #ff3366; color: #fff; }
+        
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 1em;
+        }
+        .btn-win { background: #3700b3; color: white; transition: background 0.2s; }
+        .btn-win:hover { background: #4e00ff; }
+        .btn-aside { background: #333; color: #ccc; }
+        .btn-aside:hover { background: #444; }
+
+        .accept-btn-link {
+            display: inline-block;
+            padding: 2px 10px;
+            margin-left: 8px;
+            background: #03dac6;
+            color: #000;
+            font-size: 0.8em;
+            font-weight: bold;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .accept-btn-link:hover { background: #00c4b0; }
+
+        .nav-links { margin-top: 30px; }
+        .nav-links a { color: #03dac6; text-decoration: none; font-weight: bold; }
+    </style>
+    <script>
+        function openTrailer(event, url) {
+            event.preventDefault();
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                window.open(url, '_blank');
+            } else {
+                window.location.href = "mpv:" + url;
+            }
+        }
+
+        async function checkSync(id, containerId, otherId) {
+            const container = document.getElementById(containerId);
+            const link = container.querySelector('.sync-link');
+            
+            if (link) {
+                link.innerText = "Checking...";
+                link.style.color = "#888";
+            }
+
+            try {
+                const res = await fetch(`/sync_check/${id}`);
+                const data = await res.json();
+                
+                if (data.status === "Match") {
+                    container.innerHTML = `<span style="color: #03dac6; font-size: 0.8em;">✓ Synced</span>`;
+                } else if (data.status === "Mismatch") {
+                    container.innerHTML = `
+                        <span style="color: #ffb86c; font-size: 0.8em; font-weight: bold;">⚠ ${data.details}</span>
+                        <a href="javascript:void(0)" onclick="triggerSync(${id}, ${otherId})" class="accept-btn-link">Accept Plex Info</a>
+                    `;
+                } else {
+                    container.innerHTML = `<span style="color: #cf6679; font-size: 0.8em;">Error: ${data.details}</span>`;
+                }
+            } catch (e) {
+                if (link) link.innerText = "Network Error";
+            }
+        }
+
+        function triggerSync(movieId, otherId) {
+            document.getElementById('sync-movie-id').value = movieId;
+            document.getElementById('sync-other-id').value = otherId;
+            document.getElementById('hidden-sync-form').action = "/apply_plex_sync/" + movieId;
+            document.getElementById('hidden-sync-form').submit();
+        }
+    </script>
+</head>
+<body>
+    <h1>Pick the Winner</h1>
+    
+    <form action="/vote" method="POST">
+        <input type="hidden" name="id_a" value="{{ movie_a.id }}">
+        <input type="hidden" name="id_b" value="{{ movie_b.id }}">
+        
+        <div class="container">
+            <div class="movie-card">
+                <h2>{{ movie_a.title }} ({{ movie_a.year }})</h2>
+                
+                <div class="link-bar">
+                    <a href="/edit_movie/{{ movie_a.id }}?other_id={{ movie_b.id }}">Edit Details</a>
+                    <span style="color: #444;"> | </span>
+                    <span id="sync-a">
+                        <a href="javascript:void(0)" class="sync-link" onclick="checkSync({{ movie_a.id }}, 'sync-a', '{{ movie_b.id }}')">Check Plex Sync</a>
+                    </span>
+                </div>
+
+                {% if movie_a.tmdb_trailer_url %}
+                    <a href="#" onclick="openTrailer(event, '{{ movie_a.tmdb_trailer_url }}')" class="trailer-btn">Watch Trailer</a><br>
+                    <a href="/find_trailer/{{ movie_a.id }}?other_id={{ movie_b.id }}" style="font-size: 0.7em; color: #555; text-decoration: none;">(Change Trailer)</a>
+                {% else %}
+                    <a href="/find_trailer/{{ movie_a.id }}?other_id={{ movie_b.id }}" class="trailer-btn" style="color: #ffb86c; border-color: #ffb86c;">Find Trailer</a>
+                {% endif %}
+
+                <div class="movie-summary">{{ movie_a.summary }}</div>
+                
+                <div style="margin: 10px 0;">
+                    <label style="font-size: 0.9em; cursor: pointer;">
+                        <input type="checkbox" name="watchlist_a" value="true"> Add to Watchlist
+                    </label>
+                </div>
+
+                <button type="submit" name="action" value="A_wins" class="btn-win">This is Better</button>
+                <button type="submit" name="action" value="set_aside_a" class="btn-aside">Set Aside for Review</button>
+            </div>
+
+            <div class="movie-card">
+                <h2>{{ movie_b.title }} ({{ movie_b.year }})</h2>
+                
+                <div class="link-bar">
+                    <a href="/edit_movie/{{ movie_b.id }}?other_id={{ movie_a.id }}">Edit Details</a>
+                    <span style="color: #444;"> | </span>
+                    <span id="sync-b">
+                        <a href="javascript:void(0)" class="sync-link" onclick="checkSync({{ movie_b.id }}, 'sync-b', '{{ movie_a.id }}')">Check Plex Sync</a>
+                    </span>
+                </div>
+
+                {% if movie_b.tmdb_trailer_url %}
+                    <a href="#" onclick="openTrailer(event, '{{ movie_b.tmdb_trailer_url }}')" class="trailer-btn">Watch Trailer</a><br>
+                    <a href="/find_trailer/{{ movie_b.id }}?other_id={{ movie_a.id }}" style="font-size: 0.7em; color: #555; text-decoration: none;">(Change Trailer)</a>
+                {% else %}
+                    <a href="/find_trailer/{{ movie_b.id }}?other_id={{ movie_a.id }}" class="trailer-btn" style="color: #ffb86c; border-color: #ffb86c;">Find Trailer</a>
+                {% endif %}
+
+                <div class="movie-summary">{{ movie_b.summary }}</div>
+                
+                <div style="margin: 10px 0;">
+                    <label style="font-size: 0.9em; cursor: pointer;">
+                        <input type="checkbox" name="watchlist_b" value="true"> Add to Watchlist
+                    </label>
+                </div>
+
+                <button type="submit" name="action" value="B_wins" class="btn-win">This is Better</button>
+                <button type="submit" name="action" value="set_aside_b" class="btn-aside">Set Aside for Review</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="nav-links">
+        <a href="/watchlist">View My Watchlist &rarr;</a>
+    </div>
+
+    <form id="hidden-sync-form" method="POST" style="display:none;">
+        <input type="hidden" name="other_id" id="sync-other-id">
+        <input type="hidden" name="movie_id" id="sync-movie-id">
+    </form>
+
+</body>
+</html>
