@@ -76,10 +76,14 @@ def vote():
 
 @app.route('/watchlist')
 def watchlist():
+    sort_by = request.args.get('sort', 'title')
     conn = get_db_connection()
-    movies = conn.execute("SELECT * FROM movies WHERE watchlist = 1 ORDER BY title ASC").fetchall()
+    if sort_by == 'rank':
+        movies = conn.execute("SELECT * FROM movies WHERE watchlist = 1 ORDER BY elo DESC, title ASC").fetchall()
+    else:
+        movies = conn.execute("SELECT * FROM movies WHERE watchlist = 1 ORDER BY title ASC").fetchall()
     conn.close()
-    return render_template('watchlist.html', movies=movies)
+    return render_template('watchlist.html', movies=movies, current_sort=sort_by)
 
 @app.route('/watchlist_remove', methods=['POST'])
 def watchlist_remove():
@@ -217,6 +221,22 @@ def clear_trailer():
     conn.commit()
     conn.close()
     return redirect(url_for('index', id_a=mid, id_b=oid) if oid and oid != "None" else url_for('index'))
+
+
+@app.route('/rankings')
+def rankings():
+    page = max(1, request.args.get('page', 1, type=int))
+    per_page = 50
+    offset = (page - 1) * per_page
+
+    conn = get_db_connection()
+    total_movies = conn.execute("SELECT COUNT(*) FROM movies").fetchone()[0]
+    movies = conn.execute("SELECT * FROM movies ORDER BY elo DESC LIMIT ? OFFSET ?", (per_page, offset)).fetchall()
+    conn.close()
+
+    total_pages = (total_movies + per_page - 1) // per_page
+
+    return render_template('rankings.html', movies=movies, page=page, total_pages=total_pages)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.getenv("FLASK_PORT", 5000)))

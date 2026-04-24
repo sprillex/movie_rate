@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rankings</title>
+    <style>
+        body { background: #121212; color: #eee; font-family: sans-serif; padding: 40px; }
+        .row { background: #1e1e1e; margin-bottom: 10px; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 8px 15px; border-radius: 4px; text-decoration: none; margin-left: 10px; font-weight: bold; }
+        .btn-trailer { background: #ff3366; color: white; }
+        .btn-edit { background: #bb86fc; color: black; }
+        .pagination { margin-top: 20px; text-align: center; }
+        .pagination a { color: #03dac6; text-decoration: none; padding: 8px 16px; margin: 0 4px; border: 1px solid #03dac6; border-radius: 4px; }
+        .pagination a:hover { background: #03dac6; color: #121212; }
+        .rank-info { display: flex; align-items: center; gap: 20px; }
+        .rank-number { font-size: 1.5em; font-weight: bold; color: #bb86fc; min-width: 40px; }
+        .movie-details { display: flex; flex-direction: column; }
+    </style>
+    <script>
+        function openTrailer(event, url) {
+            event.preventDefault();
+            if (/Android|iPhone|iPad/i.test(navigator.userAgent)) { window.open(url, '_blank'); }
+            else { window.location.href = "mpv:" + url; }
+        }
+    </script>
+</head>
+<body>
+    <h1>Rankings</h1>
+    <a href="/" style="color: #bb86fc;">&larr; Back to Voting</a>
+    <div style="margin-top: 20px;">
+        {% for m in movies %}
+        <div class="row">
+            <div class="rank-info">
+                <div class="rank-number">#{{ (page - 1) * 50 + loop.index }}</div>
+                <div class="movie-details">
+                    <div><strong>{{ m.title }}</strong> ({{ m.year }})</div>
+                    <small style="color: #666;">Rating: {{ m.elo | round | int }} | Matchups: {{ m.matchups }}</small>
+                </div>
+            </div>
+            <div>
+                {% if m.tmdb_trailer_url %}
+                <a href="#" onclick="openTrailer(event, '{{ m.tmdb_trailer_url }}')" class="btn btn-trailer">Trailer</a>
+                {% endif %}
+                <a href="/edit_movie/{{ m.id }}" class="btn btn-edit">Edit</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('rankings', page=page-1) }}">&laquo; Previous</a>
+        {% endif %}
+        <span>Page {{ page }} of {{ total_pages }}</span>
+        {% if page < total_pages %}
+        <a href="{{ url_for('rankings', page=page+1) }}">Next &raquo;</a>
+        {% endif %}
+    </div>
+</body>
+</html>
