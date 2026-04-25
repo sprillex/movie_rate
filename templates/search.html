@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Database</title>
+    <style>
+        body { background: #121212; color: #eee; font-family: sans-serif; padding: 40px; }
+        .search-container { background: #1e1e1e; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: inline-block; margin-right: 15px; margin-bottom: 5px; }
+        input[type="text"] { width: 100%; padding: 10px; margin-top: 5px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; }
+        button { background: #03dac6; color: #121212; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #018786; }
+
+        .result-card { background: #1e1e1e; margin-bottom: 10px; padding: 20px; border-radius: 8px; }
+        .result-field { margin-bottom: 5px; }
+        .field-name { font-weight: bold; color: #bb86fc; width: 150px; display: inline-block; }
+
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Search Database</h1>
+    <a href="/" style="color: #bb86fc;">&larr; Back to Voting</a>
+
+    <div class="search-container">
+        <form action="/search" method="GET">
+            <div class="form-group">
+                <label for="query">Search Query:</label>
+                <input type="text" id="query" name="query" value="{{ query }}" placeholder="Enter search term...">
+            </div>
+
+            <p><strong>Search in fields:</strong></p>
+            <div class="checkbox-grid">
+                {% set available_fields = ['id', 'title', 'year', 'summary', 'plex_url', 'tmdb_trailer_url', 'elo', 'matchups', 'status', 'watchlist', 'plex_id'] %}
+                {% for field in available_fields %}
+                <label>
+                    <input type="checkbox" name="field" value="{{ field }}"
+                           {% if not selected_fields and loop.index0 < 3 %}checked{% elif selected_fields and field in selected_fields %}checked{% endif %}>
+                    {{ field }}
+                </label>
+                {% endfor %}
+            </div>
+
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    {% if query %}
+    <h2>Results for "{{ query }}" ({{ results|length }} found)</h2>
+
+    {% if results %}
+        {% for row in results %}
+        <div class="result-card">
+            {% for key in row.keys() %}
+            <div class="result-field">
+                <span class="field-name">{{ key }}:</span>
+                <span class="field-value">{{ row[key] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+    {% endif %}
+
+</body>
+</html>
