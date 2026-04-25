@@ -115,7 +115,7 @@ def sync_plex_to_db():
         
         # Fallback to title and year if not found by plex_id
         if not row:
-            cursor.execute("SELECT id, tmdb_trailer_url, user_edited FROM movies WHERE title = ? AND year = ?", (video.title, video.year))
+            cursor.execute("SELECT id, tmdb_trailer_url, user_edited FROM movies WHERE title = ? AND year IS ?", (video.title, video.year))
             row = cursor.fetchone()
 
         trailer_url = row[1] if row else None
