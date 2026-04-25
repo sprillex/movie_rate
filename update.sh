@@ -320,6 +320,9 @@ save_secret() {
     local val="$2"
     # Remove existing key if present
     if [ -f "$SECRETS_FILE" ]; then
+        if [ "$(tail -c 1 "$SECRETS_FILE" | wc -l)" -eq 0 ]; then
+            echo "" >> "$SECRETS_FILE"
+        fi
         sed -i "/^$key=/d" "$SECRETS_FILE"
     fi
     echo "$key=$val" >> "$SECRETS_FILE"
