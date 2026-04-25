@@ -168,7 +168,15 @@
         
         <div class="container">
             <div class="movie-card">
-                <h2>{{ movie_a.title }} ({{ movie_a.year }})</h2>
+                <h2>
+                    {% if movie_a.plex_url %}
+                        <a href="{{ movie_a.plex_url }}" target="plex_ab" style="color: inherit; text-decoration: none;">
+                            {{ movie_a.title }} ({{ movie_a.year }})
+                        </a>
+                    {% else %}
+                        {{ movie_a.title }} ({{ movie_a.year }})
+                    {% endif %}
+                </h2>
                 
                 <div class="link-bar">
                     <a href="/edit_movie/{{ movie_a.id }}?other_id={{ movie_b.id }}">Edit Details</a>
@@ -198,7 +206,15 @@
             </div>
 
             <div class="movie-card">
-                <h2>{{ movie_b.title }} ({{ movie_b.year }})</h2>
+                <h2>
+                    {% if movie_b.plex_url %}
+                        <a href="{{ movie_b.plex_url }}" target="plex_ab" style="color: inherit; text-decoration: none;">
+                            {{ movie_b.title }} ({{ movie_b.year }})
+                        </a>
+                    {% else %}
+                        {{ movie_b.title }} ({{ movie_b.year }})
+                    {% endif %}
+                </h2>
                 
                 <div class="link-bar">
                     <a href="/edit_movie/{{ movie_b.id }}?other_id={{ movie_a.id }}">Edit Details</a>
