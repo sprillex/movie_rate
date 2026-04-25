@@ -601,6 +601,9 @@ do_install() {
 
     cp "$MAIN_SCRIPT" "$INSTALL_DIR/"
     if [ -f "requirements.txt" ]; then cp "requirements.txt" "$INSTALL_DIR/"; fi
+    if [ -f "sync_plex.py" ]; then cp "sync_plex.py" "$INSTALL_DIR/"; fi
+    if [ -d "templates" ]; then cp -r "templates" "$INSTALL_DIR/"; fi
+    if [ -f "movies.db" ] && [ ! -f "$INSTALL_DIR/movies.db" ]; then cp "movies.db" "$INSTALL_DIR/"; fi
 
     if [ -f "$SECRETS_FILE" ]; then
         log_info "Installing secrets file..."
@@ -726,6 +729,9 @@ do_upgrade() {
 
     cp "$MAIN_SCRIPT" "$INSTALL_DIR/"
     if [ -f "requirements.txt" ]; then cp "requirements.txt" "$INSTALL_DIR/"; fi
+    if [ -f "sync_plex.py" ]; then cp "sync_plex.py" "$INSTALL_DIR/"; fi
+    if [ -d "templates" ]; then cp -r "templates" "$INSTALL_DIR/"; fi
+    if [ -f "movies.db" ] && [ ! -f "$INSTALL_DIR/movies.db" ]; then cp "movies.db" "$INSTALL_DIR/"; fi
 
     chown -R "$SERVICE_USER":"$SERVICE_GROUP" "$INSTALL_DIR"
 
