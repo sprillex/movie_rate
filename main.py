@@ -304,4 +304,4 @@ def rankings():
     return render_template('rankings.html', movies=movies, page=page, total_pages=total_pages)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.getenv("FLASK_PORT", 5000)))
+    app.run(host='0.0.0.0', port=int(os.getenv("PORT", 5000)))
