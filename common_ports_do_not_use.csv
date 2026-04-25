@@ -1,0 +1,80 @@
+21,FTP
+22,SSH
+23,Telnet
+25,SMTP
+53,DNS / AdGuard / Pi-hole
+80,HTTP / Web Services
+81,Nginx Proxy Manager
+110,POP3
+111,RPC
+139,NetBIOS
+143,IMAP
+443,HTTPS / Web Services
+445,SMB
+465,SMTPS
+587,SMTP Submission
+993,IMAPS
+995,POP3S
+1194,OpenVPN
+1880,Node-RED
+1883,Mosquitto (MQTT)
+2283,Immich
+2342,Photoprism
+3000,Dev / Grafana / AdGuard
+3001,Uptime Kuma
+3306,MySQL
+3389,RDP
+3579,Ombi
+4533,Navidrome
+5000,Frigate / Common Dev
+5055,Overseerr
+5252,DietPi Dashboard
+5299,LazyLibrarian
+5335,Unbound
+5432,PostgreSQL
+5900,VNC
+6379,Redis
+6767,Bazarr
+6789,NZBGet
+6881,qBittorrent
+6969,Whisparr
+7575,Homarr
+7878,Radarr
+8000,Paperless-ngx / Common Dev
+8008,Matrix Synapse
+8065,Mattermost
+8080,Zigbee2MQTT / UniFi / Proxy
+8083,Calibre-Web
+8090,Mylar3
+8096,Jellyfin / Emby
+8123,Home Assistant
+8181,Tautulli
+8200,Duplicati
+8384,Syncthing
+8443,UniFi Network Controller
+8581,Homebridge
+8686,Lidarr
+8765,MotionEye
+8787,Readarr
+8989,Sonarr
+9000,Lyrion / MinIO / Portainer
+9001,MinIO
+9090,SABnzbd / Prometheus
+9091,Transmission
+9117,Jackett
+9443,Portainer
+9541,TasmoAdmin
+9696,Prowlarr
+10000,Webmin
+10443,Scrypted
+11080,Scrypted
+13378,Audiobookshelf
+19999,Netdata
+22000,Syncthing
+25565,Minecraft Server
+25600,Komga
+27017,MongoDB
+32400,Plex Media Server
+41641,Tailscale
+51820,WireGuard
+61208,Glances
