@@ -270,7 +270,7 @@ def duplicates():
     exact_match_query = conn.execute("""
         SELECT m1.* FROM movies m1
         JOIN (SELECT title, year FROM movies GROUP BY title, year HAVING COUNT(*) > 1) m2
-        ON m1.title = m2.title AND m1.year = m2.year
+        ON m1.title = m2.title AND m1.year IS m2.year
     """).fetchall()
 
     # Combine and remove actual duplicates from the list (using id as unique identifier)
@@ -278,7 +278,7 @@ def duplicates():
     unique_dups = {m['id']: m for m in all_dups}.values()
 
     conn.close()
-    return render_template('duplicates.html', movies=unique_dups)
+    return render_template('duplicates.html', movies=list(unique_dups))
 
 @app.route('/delete_movie/<int:movie_id>', methods=['POST'])
 def delete_movie(movie_id):

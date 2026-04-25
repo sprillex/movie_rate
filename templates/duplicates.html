@@ -25,7 +25,7 @@
             <div class="movie-info">
                 <div class="movie-title">{{ m.title }} ({{ m.year }})</div>
                 <div style="color: #aaa; font-size: 0.9em; margin-bottom: 5px;">ID: {{ m.id }} | Plex ID: {{ m.plex_id or 'None' }}</div>
-                <div style="font-size: 0.9em;">{{ m.summary | truncate(150) }}</div>
+                <div style="font-size: 0.9em;">{{ (m.summary if m.summary is not none else '') | truncate(150) }}</div>
             </div>
             <div style="display: flex; gap: 10px;">
                 <a href="/edit_movie/{{ m.id }}" class="btn btn-edit">Edit</a>
