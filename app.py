@@ -16,6 +16,19 @@ DB_FILE = 'movies.db'
 def get_db_connection():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row 
+
+    # Run automatic migrations
+    try:
+        conn.execute("ALTER TABLE movies ADD COLUMN plex_id TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass # Column already exists
+    try:
+        conn.execute("ALTER TABLE movies ADD COLUMN user_edited INTEGER DEFAULT 0")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass # Column already exists
+
     return conn
 
 def calculate_elo(rating_a, rating_b, actual_a):
@@ -107,10 +120,10 @@ def update_movie():
     title, year, summary = request.form.get('title'), request.form.get('year'), request.form.get('summary')
     conn = get_db_connection()
     try:
-        conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
+        conn.execute("UPDATE movies SET title=?, year=?, summary=?, user_edited=1 WHERE id=?",
                      (title, year, summary, mid))
     except sqlite3.IntegrityError:
-        conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
+        conn.execute("UPDATE movies SET title=?, year=?, summary=?, user_edited=1 WHERE id=?",
                      (f"{title} [Duplicate {mid}]", year, summary, mid))
     conn.commit()
     conn.close()
@@ -226,7 +239,7 @@ def search():
     query = request.args.get('query', '').strip()
     selected_fields = request.args.getlist('field')
 
-    valid_fields = ['id', 'title', 'year', 'summary', 'plex_url', 'tmdb_trailer_url', 'elo', 'matchups', 'status', 'watchlist', 'plex_id']
+    valid_fields = ['id', 'title', 'year', 'summary', 'plex_url', 'tmdb_trailer_url', 'elo', 'matchups', 'status', 'watchlist', 'plex_id', 'user_edited']
 
     # Filter selected fields to prevent SQL injection
     selected_fields = [f for f in selected_fields if f in valid_fields]
@@ -246,6 +259,34 @@ def search():
         conn.close()
 
     return render_template('search.html', query=query, results=results, selected_fields=selected_fields)
+
+@app.route('/duplicates')
+def duplicates():
+    conn = get_db_connection()
+    # Find movies with '[Duplicate' in the title
+    dup_query = conn.execute("SELECT * FROM movies WHERE title LIKE '%[Duplicate%'").fetchall()
+
+    # Find movies with the exact same title and year
+    exact_match_query = conn.execute("""
+        SELECT m1.* FROM movies m1
+        JOIN (SELECT title, year FROM movies GROUP BY title, year HAVING COUNT(*) > 1) m2
+        ON m1.title = m2.title AND m1.year = m2.year
+    """).fetchall()
+
+    # Combine and remove actual duplicates from the list (using id as unique identifier)
+    all_dups = dup_query + exact_match_query
+    unique_dups = {m['id']: m for m in all_dups}.values()
+
+    conn.close()
+    return render_template('duplicates.html', movies=unique_dups)
+
+@app.route('/delete_movie/<int:movie_id>', methods=['POST'])
+def delete_movie(movie_id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM movies WHERE id = ?", (movie_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('duplicates'))
 
 @app.route('/rankings')
 def rankings():

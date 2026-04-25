@@ -32,7 +32,7 @@
 
             <p><strong>Search in fields:</strong></p>
             <div class="checkbox-grid">
-                {% set available_fields = ['id', 'title', 'year', 'summary', 'plex_url', 'tmdb_trailer_url', 'elo', 'matchups', 'status', 'watchlist', 'plex_id'] %}
+                {% set available_fields = ['id', 'title', 'year', 'summary', 'plex_url', 'tmdb_trailer_url', 'elo', 'matchups', 'status', 'watchlist', 'plex_id', 'user_edited'] %}
                 {% for field in available_fields %}
                 <label>
                     <input type="checkbox" name="field" value="{{ field }}"
