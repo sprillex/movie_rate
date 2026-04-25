@@ -11,7 +11,7 @@ Movie Ranker is a Python web application built with Flask that synchronizes meta
 
 1.  **Clone the repository and enter the directory:**
     ```bash
-    git clone https://github.com/your-username/movie_rate.git
+    git clone https://github.com/sprillex/movie_rate.git
     cd movie_rate
     ```
 
