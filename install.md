@@ -5,7 +5,7 @@ A generic, self-healing installer for deploying Python scripts as systemd servic
 ## Features
 * **Interactive Setup:** Prompts for service name, user, and description.
 * **Virtual Environments:** Automatically manages `venv` for both testing and production.
-* **Secret Management:** Securely handles API keys using `.env.example` templates.
+* **Secret Management:** Securely handles API keys using `example.env` templates.
 * **Self-Updating:** The installer checks for updates to itself during the upgrade process.
 * **Git Integration:** Supports deploying specific branches (Main, Newest, or Custom).
 * **Universal Update Manager Compatibility:** Built to be invoked automatically by `universal_update_manager.sh`.
@@ -28,7 +28,7 @@ If you are building a new project based on this template, you should ensure that
     * `update.sh` (The installer / service manager)
     * `main.py` (Your python script)
     * `requirements.txt` (Dependencies)
-    * `.env.example` (Optional: List of required API keys)
+    * `example.env` (Optional: List of required API keys)
 
 2.  **Make executable:**
     ```bash
@@ -49,7 +49,7 @@ If you are building a new project based on this template, you should ensure that
 ## Configuration Files
 * `service_config.env`: Stores non-sensitive installation settings (Service Name, Path, User).
 * `secrets.env`: Stores sensitive API keys. **This file is never committed to Git.**
-* `.env.example`: A template file you create to tell the installer which keys to ask for.
+* `example.env`: A template file you create to tell the installer which keys to ask for.
 
 ## Uninstalling
 Run the script and select **Uninstall**. This will:
