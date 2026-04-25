@@ -221,6 +221,32 @@ def clear_trailer():
     return redirect(url_for('index', id_a=mid, id_b=oid) if oid and oid != "None" else url_for('index'))
 
 
+@app.route('/search')
+def search():
+    query = request.args.get('query', '').strip()
+    selected_fields = request.args.getlist('field')
+
+    valid_fields = ['id', 'title', 'year', 'summary', 'plex_url', 'tmdb_trailer_url', 'elo', 'matchups', 'status', 'watchlist', 'plex_id']
+
+    # Filter selected fields to prevent SQL injection
+    selected_fields = [f for f in selected_fields if f in valid_fields]
+
+    results = []
+
+    if query and selected_fields:
+        conn = get_db_connection()
+        where_clauses = [f"{f} LIKE ?" for f in selected_fields]
+        where_sql = " OR ".join(where_clauses)
+
+        # Add wildcards for LIKE matching
+        params = [f"%{query}%" for _ in selected_fields]
+
+        sql = f"SELECT * FROM movies WHERE {where_sql} ORDER BY title ASC"
+        results = conn.execute(sql, params).fetchall()
+        conn.close()
+
+    return render_template('search.html', query=query, results=results, selected_fields=selected_fields)
+
 @app.route('/rankings')
 def rankings():
     page = max(1, request.args.get('page', 1, type=int))
