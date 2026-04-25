@@ -597,6 +597,8 @@ do_install() {
     if [ ! -d "$INSTALL_DIR" ]; then mkdir -p "$INSTALL_DIR"; fi
 
     cp "$MAIN_SCRIPT" "$INSTALL_DIR/"
+    cp -r "templates" "$INSTALL_DIR/"
+    cp "sync_plex.py" "$INSTALL_DIR/"
     if [ -f "requirements.txt" ]; then cp "requirements.txt" "$INSTALL_DIR/"; fi
 
     if [ -f "$SECRETS_FILE" ]; then
@@ -722,6 +724,8 @@ do_upgrade() {
     fi
 
     cp "$MAIN_SCRIPT" "$INSTALL_DIR/"
+    cp -r "templates" "$INSTALL_DIR/"
+    cp "sync_plex.py" "$INSTALL_DIR/"
     if [ -f "requirements.txt" ]; then cp "requirements.txt" "$INSTALL_DIR/"; fi
 
     chown -R "$SERVICE_USER":"$SERVICE_GROUP" "$INSTALL_DIR"
