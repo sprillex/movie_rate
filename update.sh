@@ -590,7 +590,7 @@ do_install() {
 
          if [ "$CHECKSUM_BEFORE" != "$CHECKSUM_AFTER" ]; then
              log_warn "INSTALLER SCRIPT UPDATED - RESTARTING..."
-             exec "$0" --install --branch "$CURRENT_GIT_BRANCH"
+             exec bash "$0" --install --branch "$CURRENT_GIT_BRANCH"
          fi
     fi
 
@@ -719,7 +719,7 @@ do_upgrade() {
 
         if [ "$CHECKSUM_BEFORE" != "$CHECKSUM_AFTER" ]; then
             log_warn "INSTALLER SCRIPT UPDATED - RESTARTING..."
-            exec "$0" --update --branch "$CURRENT_GIT_BRANCH"
+            exec bash "$0" --update --branch "$CURRENT_GIT_BRANCH"
         fi
     fi
 
