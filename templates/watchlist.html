@@ -5,10 +5,17 @@
     <title>Watchlist</title>
     <style>
         body { background: #121212; color: #eee; font-family: sans-serif; padding: 40px; }
-        .row { background: #1e1e1e; margin-bottom: 10px; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .btn { padding: 8px 15px; border-radius: 4px; text-decoration: none; margin-left: 10px; font-weight: bold; }
+        .row { background: #1e1e1e; margin-bottom: 10px; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .btn { padding: 8px 15px; border-radius: 4px; text-decoration: none; margin-left: 10px; font-weight: bold; white-space: nowrap; }
         .btn-trailer { background: #ff3366; color: white; }
         .btn-edit { background: #bb86fc; color: black; }
+        .sort-links { margin-top: 15px; margin-bottom: 20px; }
+        .sort-links a { color: #888; text-decoration: none; margin-right: 15px; font-weight: bold; }
+        .sort-links a.active { color: #03dac6; border-bottom: 2px solid #03dac6; }
+        .movie-info { flex-grow: 1; margin-right: 20px; }
+        .movie-summary { color: #aaa; font-size: 0.9em; margin-top: 8px; line-height: 1.4; }
+        .movie-meta { color: #888; font-size: 0.85em; margin-top: 5px; }
+        .actions { display: flex; align-items: center; }
     </style>
     <script>
         function openTrailer(event, url) {
@@ -21,14 +28,26 @@
 <body>
     <h1>Your Watchlist</h1>
     <a href="/" style="color: #bb86fc;">&larr; Back to Voting</a>
+
+    <div class="sort-links">
+        Sort by:
+        <a href="/watchlist?sort=title" class="{% if current_sort == 'title' %}active{% endif %}">Title</a>
+        <a href="/watchlist?sort=rank" class="{% if current_sort == 'rank' %}active{% endif %}">Rank (Elo)</a>
+    </div>
+
     <div style="margin-top: 20px;">
         {% for m in movies %}
         <div class="row">
-            <div>
-                <strong>{{ m.title }}</strong> ({{ m.year }})<br>
-                <small style="color: #666;">{{ m.file_name }}</small>
+            <div class="movie-info">
+                <strong>{{ m.title }}</strong> ({{ m.year }})
+                <div class="movie-meta">
+                    Rating: <span style="color: #bb86fc;">{{ m.elo | round | int }}</span>
+                </div>
+                {% if m.summary %}
+                <div class="movie-summary">{{ m.summary }}</div>
+                {% endif %}
             </div>
-            <div>
+            <div class="actions">
                 {% if m.tmdb_trailer_url %}
                 <a href="#" onclick="openTrailer(event, '{{ m.tmdb_trailer_url }}')" class="btn btn-trailer">Trailer</a>
                 {% endif %}

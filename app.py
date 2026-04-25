@@ -76,10 +76,14 @@ def vote():
 
 @app.route('/watchlist')
 def watchlist():
+    sort_by = request.args.get('sort', 'title')
     conn = get_db_connection()
-    movies = conn.execute("SELECT * FROM movies WHERE watchlist = 1 ORDER BY title ASC").fetchall()
+    if sort_by == 'rank':
+        movies = conn.execute("SELECT * FROM movies WHERE watchlist = 1 ORDER BY elo DESC, title ASC").fetchall()
+    else:
+        movies = conn.execute("SELECT * FROM movies WHERE watchlist = 1 ORDER BY title ASC").fetchall()
     conn.close()
-    return render_template('watchlist.html', movies=movies)
+    return render_template('watchlist.html', movies=movies, current_sort=sort_by)
 
 @app.route('/watchlist_remove', methods=['POST'])
 def watchlist_remove():
