@@ -17,7 +17,7 @@
 #   - Dependencies: python3, python3-venv, git, systemd
 #   - Config File: service_config.env (Created interactively)
 #   - Secrets: secrets.env (Managed locally, never committed)
-#   - Template: .env.example (Used for auto-discovery of secrets)
+#   - Template: example.env (Used for auto-discovery of secrets)
 #
 # USAGE:
 #   ./update.sh [OPTION]
@@ -45,7 +45,7 @@
 #   SERVICE_USER    : Non-root user to run the specific service
 #
 # SECRET MANAGEMENT:
-#   - Looks for '.env.example' to prompt user for specific keys.
+#   - Looks for 'example.env' to prompt user for specific keys.
 #   - Saves keys to 'secrets.env' (chmod 600).
 #   - Installs secrets to /opt/... and uses 'EnvironmentFile' in systemd.
 #
@@ -56,7 +56,7 @@
 
 CONFIG_FILE="service_config.env"
 SECRETS_FILE="secrets.env"
-TEMPLATE_FILE=".env.example"
+TEMPLATE_FILE="example.env"
 COMMON_PORTS_FILE="common_ports_do_not_use.csv"
 
 # ANSI Colors
@@ -354,7 +354,7 @@ manage_secrets() {
         return 0
     fi
 
-    # MODE 1: Auto-Discovery via .env.example
+    # MODE 1: Auto-Discovery via example.env
     if [ -f "$TEMPLATE_FILE" ]; then
         log_info "Found template '$TEMPLATE_FILE'. Detecting required keys..."
 
