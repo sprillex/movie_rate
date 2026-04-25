@@ -110,9 +110,8 @@ def update_movie():
         conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
                      (title, year, summary, mid))
     except sqlite3.IntegrityError:
-        conn.execute("UPDATE movies SET title = title || ' [Duplicate ' || id || ']' WHERE title=? AND year=? AND id!=?", (title, year, mid))
         conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
-                     (title, year, summary, mid))
+                     (f"{title} [Duplicate {mid}]", year, summary, mid))
     conn.commit()
     conn.close()
     return redirect(url_for('index', id_a=mid, id_b=oid) if oid and oid != "None" else url_for('index'))
@@ -147,9 +146,8 @@ def apply_plex_sync(movie_id):
                 conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
                              (p_movie.title, p_movie.year, p_movie.summary, movie_id))
             except sqlite3.IntegrityError:
-                conn.execute("UPDATE movies SET title = title || ' [Duplicate ' || id || ']' WHERE title=? AND year=? AND id!=?", (p_movie.title, p_movie.year, movie_id))
                 conn.execute("UPDATE movies SET title=?, year=?, summary=? WHERE id=?",
-                             (p_movie.title, p_movie.year, p_movie.summary, movie_id))
+                             (f"{p_movie.title} [Duplicate {movie_id}]", p_movie.year, p_movie.summary, movie_id))
             conn.commit()
     except Exception as e:
         print(f"Apply Sync Error: {e}")
