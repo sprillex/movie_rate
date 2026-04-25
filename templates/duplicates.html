@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Duplicates</title>
+    <style>
+        body { background: #121212; color: #eee; font-family: sans-serif; padding: 40px; }
+        .movie-card { background: #1e1e1e; margin-bottom: 20px; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .movie-info { max-width: 70%; }
+        .movie-title { font-size: 1.2em; font-weight: bold; color: #bb86fc; margin-bottom: 5px; }
+        .btn { padding: 8px 15px; border-radius: 4px; text-decoration: none; margin-left: 10px; font-weight: bold; border: none; cursor: pointer; }
+        .btn-delete { background: #cf6679; color: #121212; }
+        .btn-edit { background: #03dac6; color: #121212; }
+        .btn:hover { opacity: 0.8; }
+        .empty-state { text-align: center; color: #888; font-style: italic; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <h1>Manage Duplicates</h1>
+    <a href="/" style="color: #bb86fc; text-decoration: none; margin-bottom: 20px; display: inline-block;">&larr; Back to Voting</a>
+
+    {% if movies %}
+        {% for m in movies %}
+        <div class="movie-card">
+            <div class="movie-info">
+                <div class="movie-title">{{ m.title }} ({{ m.year }})</div>
+                <div style="color: #aaa; font-size: 0.9em; margin-bottom: 5px;">ID: {{ m.id }} | Plex ID: {{ m.plex_id or 'None' }}</div>
+                <div style="font-size: 0.9em;">{{ m.summary | truncate(150) }}</div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="/edit_movie/{{ m.id }}" class="btn btn-edit">Edit</a>
+                <form action="/delete_movie/{{ m.id }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this duplicate? This action cannot be undone.');">
+                    <button type="submit" class="btn btn-delete">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <h2>No potential duplicates found!</h2>
+            <p>Your database looks clean.</p>
+        </div>
+    {% endif %}
+</body>
+</html>

@@ -109,9 +109,15 @@ def sync_plex_to_db():
         encoded_key = urllib.parse.quote(video.key, safe='')
         direct_url = f"{PLEX_URL}/web/index.html#!/server/{machine_id}/details?key={encoded_key}"
 
-        cursor.execute("SELECT id, tmdb_trailer_url FROM movies WHERE title = ? AND year = ?", (video.title, video.year))
+        # Try to find by plex_id first
+        cursor.execute("SELECT id, tmdb_trailer_url, user_edited FROM movies WHERE plex_id = ?", (video.key,))
         row = cursor.fetchone()
         
+        # Fallback to title and year if not found by plex_id
+        if not row:
+            cursor.execute("SELECT id, tmdb_trailer_url, user_edited FROM movies WHERE title = ? AND year = ?", (video.title, video.year))
+            row = cursor.fetchone()
+
         trailer_url = row[1] if row else None
 
         if not trailer_url:
@@ -120,17 +126,41 @@ def sync_plex_to_db():
                 trailer_url = get_ytdlp_trailer(video.title, video.year)
 
         if row:
-            cursor.execute('''
-                UPDATE movies 
-                SET summary = ?, plex_url = ?, tmdb_trailer_url = ?
-                WHERE id = ?
-            ''', (video.summary, direct_url, trailer_url, row[0]))
+            user_edited = row[2]
+            if user_edited == 1:
+                cursor.execute('''
+                    UPDATE movies
+                    SET plex_id = ?, plex_url = ?, tmdb_trailer_url = ?
+                    WHERE id = ?
+                ''', (video.key, direct_url, trailer_url, row[0]))
+            else:
+                try:
+                    cursor.execute('''
+                        UPDATE movies
+                        SET title = ?, year = ?, summary = ?, plex_id = ?, plex_url = ?, tmdb_trailer_url = ?
+                        WHERE id = ?
+                    ''', (video.title, video.year, video.summary, video.key, direct_url, trailer_url, row[0]))
+                except sqlite3.IntegrityError:
+                    cursor.execute('''
+                        UPDATE movies
+                        SET title = ?, year = ?, summary = ?, plex_id = ?, plex_url = ?, tmdb_trailer_url = ?
+                        WHERE id = ?
+                    ''', (f"{video.title} [Duplicate {row[0]}]", video.year, video.summary, video.key, direct_url, trailer_url, row[0]))
             updated_count += 1
         else:
-            cursor.execute('''
-                INSERT INTO movies (title, year, summary, plex_url, tmdb_trailer_url, elo, matchups, status, watchlist)
-                VALUES (?, ?, ?, ?, ?, 1000, 0, 'active', 0)
-            ''', (video.title, video.year, video.summary, direct_url, trailer_url))
+            try:
+                cursor.execute('''
+                    INSERT INTO movies (title, year, summary, plex_url, tmdb_trailer_url, elo, matchups, status, watchlist, plex_id)
+                    VALUES (?, ?, ?, ?, ?, 1000, 0, 'active', 0, ?)
+                ''', (video.title, video.year, video.summary, direct_url, trailer_url, video.key))
+            except sqlite3.IntegrityError:
+                 # Need an ID for the duplicate string, so insert, get id, and update
+                 cursor.execute('''
+                    INSERT INTO movies (title, year, summary, plex_url, tmdb_trailer_url, elo, matchups, status, watchlist, plex_id)
+                    VALUES (?, ?, ?, ?, ?, 1000, 0, 'active', 0, ?)
+                ''', (f"{video.title} [Duplicate Pending]", video.year, video.summary, direct_url, trailer_url, video.key))
+                 new_id = cursor.lastrowid
+                 cursor.execute("UPDATE movies SET title = ? WHERE id = ?", (f"{video.title} [Duplicate {new_id}]", new_id))
             added_count += 1
             
     conn.commit()
